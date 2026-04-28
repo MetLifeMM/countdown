@@ -1,439 +1,231 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
 <meta charset="utf-8">
-
 <title>Confidence Timer PRO</title>
-
- 
 
 <meta name="viewport" content="width=1920,height=1080">
 
- 
-
 <style>
-
 html,body{
-
   margin:0;
-
   width:100%;
-
   height:100%;
-
   background:black;
-
   color:white;
-
   font-family:Arial,Helvetica,sans-serif;
-
   overflow:hidden;
-
 }
-
- 
 
 /* ================= TIMER ================= */
-
 #screen{
-
   display:flex;
-
   justify-content:center;
-
   align-items:center;
-
   height:100%;
-
 }
-
 #timer{
-
   font-size:520px;
-
   font-weight:900;
-
 }
-
 .warning{color:orange;}
-
 .danger{color:red;}
-
 .blink{animation:blink 1s infinite;}
-
 @keyframes blink{50%{opacity:0;}}
 
- 
-
 /* ================= INPUT ================= */
-
 #manual{
-
   position:absolute;
-
   top:40px;
-
   width:100%;
-
   text-align:center;
-
   font-size:50px;
-
   opacity:.85;
-
   display:none;
-
 }
-
- 
 
 /* ================= END ================= */
-
 #end{
-
   position:fixed;
-
   inset:0;
-
   display:none;
-
   justify-content:center;
-
   align-items:center;
-
   text-align:center;
-
   background:
-
     radial-gradient(circle at center,#ffcc66 0%,#ff9933 45%,#cc6600 100%);
-
 }
-
 #endBox{
-
   padding:80px;
-
   background:rgba(0,0,0,.25);
-
 }
-
 #end h1{
-
   font-size:170px;
-
   margin:0 0 40px;
-
   color:#fff3c0;
-
 }
-
 #end p{
-
   font-size:58px;
-
 }
-
 </style>
-
 </head>
-
- 
 
 <body>
 
- 
-
 <div id="screen">
-
   <div id="timer">00:00</div>
-
 </div>
-
- 
 
 <div id="manual">
-
   Ajustando tiempo: <span id="manualValue">0</span> minutos<br>
-
   (Inicio automático)
-
 </div>
-
- 
 
 <div id="end">
-
   <div id="endBox">
-
     <h1>Tu tiempo ha terminado</h1>
-
     <p>Por favor, concluye tu participación.</p>
-
   </div>
-
 </div>
 
- 
-
 <script>
-
 /* ================= ESTADO ================= */
-
 var total=0, remaining=0;
-
 var running=false, interval=null;
-
 var endTimestamp=0;
 
- 
-
 var mode="IDLE"; // IDLE | INPUT | RUNNING | END
-
 var manualBuffer="";
-
 var inputTimeout=null;
-
 var INPUT_DELAY=2000;
 
- 
-
 /* ================= HELPERS ================= */
-
 function pad(n){return (n<10?"0":"")+n;}
 
- 
-
 function updateDisplay(){
-
   var t=document.getElementById("timer");
-
-  t.textContent=
-
+  t.textContent =
     pad(Math.floor(remaining/60))+":"+pad(remaining%60);
 
- 
-
   t.className="";
-
   if(remaining<=60 && remaining>10) t.className="warning";
-
   if(remaining<=10) t.className="danger blink";
-
 }
 
- 
-
 /* ================= TIMER ================= */
-
 function tick(){
-
   if(!running) return;
 
- 
-
   remaining=Math.max(
-
     0,
-
     Math.ceil((endTimestamp-Date.now())/1000)
-
   );
-
- 
 
   updateDisplay();
 
- 
-
+  // 🔥 CAMBIO CLAVE: END INMEDIATO (SIN setTimeout)
   if(remaining<=0){
-
     stopTimer();
-
-    setTimeout(showEnd,1500);
-
+    showEnd();
   }
-
 }
-
- 
 
 function startTimer(){
-
   if(remaining<=0) return;
-
   running=true;
-
   mode="RUNNING";
-
   endTimestamp=Date.now()+remaining*1000;
-
   interval=setInterval(tick,250);
-
 }
-
- 
 
 function stopTimer(){
-
   running=false;
-
   if(interval){clearInterval(interval);interval=null;}
-
 }
-
- 
 
 /* ================= INPUT ================= */
-
 function startInput(digit){
-
   if(mode!=="INPUT"){
-
     mode="INPUT";
-
     manualBuffer="";
-
     document.getElementById("manual").style.display="block";
-
   }
-
- 
 
   manualBuffer+=digit;
-
   document.getElementById("manualValue").textContent=manualBuffer;
 
- 
-
   if(inputTimeout) clearTimeout(inputTimeout);
-
   inputTimeout=setTimeout(confirmInputAuto,INPUT_DELAY);
-
 }
-
- 
 
 function confirmInputAuto(){
-
   if(manualBuffer==="") return;
 
- 
-
   total=parseInt(manualBuffer,10)*60;
-
   remaining=total;
-
   document.getElementById("manual").style.display="none";
-
   startTimer();
-
 }
-
- 
 
 /* ================= RESET ================= */
-
 function resetAll(){
-
   if(inputTimeout) clearTimeout(inputTimeout);
-
   stopTimer();
-
   total=0; remaining=0;
-
   manualBuffer="";
-
   mode="IDLE";
-
   document.getElementById("manual").style.display="none";
-
   document.getElementById("end").style.display="none";
-
   var t=document.getElementById("timer");
-
   t.className="";
-
   t.textContent="00:00";
-
 }
-
- 
 
 /* ================= END ================= */
-
 function showEnd(){
-
+  if(mode==="END") return; // evita doble entrada
   mode="END";
-
   document.getElementById("end").style.display="flex";
-
 }
 
- 
-
 /* ================= INPUT HANDLER ================= */
-
 document.addEventListener("keydown",function(e){
 
- 
-
   // SOLO DIGITOS
-
   if(e.keyCode<48 || e.keyCode>57) return;
-
   var digit=String.fromCharCode(e.keyCode);
 
- 
-
   if(mode==="END"){
-
     resetAll();
-
     return;
-
   }
-
- 
 
   // 9 = RESET TOTAL
-
   if(digit==="9"){
-
     resetAll();
-
     return;
-
   }
-
- 
 
   if(mode==="RUNNING"){
-
     if(digit==="0") resetAll();
-
     return;
-
   }
 
- 
-
   startInput(digit);
-
 });
 
- 
+/* ================= WATCHDOG TIZEN ================= */
+/* Garantiza END incluso si el engine falla */
+setInterval(function(){
+  if(mode==="RUNNING" && remaining===0){
+    stopTimer();
+    showEnd();
+  }
+},500);
 
 /* ================= INIT ================= */
-
 resetAll();
-
 </script>
 
- 
-
 </body>
-
 </html>
