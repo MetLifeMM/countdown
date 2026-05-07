@@ -104,6 +104,118 @@ html,body{
 
   letter-spacing:1px;
 
+}
+
+ 
+
+/* ================= TIMER ================= */
+
+#screen{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  height:100%;
+
+  flex-direction:column;
+
+}
+
+ 
+
+#timer{
+
+  font-size:520px;
+
+  font-weight:900;
+
+}
+
+ 
+
+.warning{color:orange;}
+
+.danger{color:red;}
+
+.blink{animation:blink 1s infinite;}
+
+ 
+
+@keyframes blink{50%{opacity:0;}}
+
+ 
+
+/* ================= MENSAJE FINAL ================= */
+
+#endMessage{
+
+  display:none;
+
+  margin-top:40px;
+
+  text-align:center;
+
+}
+
+ 
+
+#endMessage h1{
+
+  font-size:120px;
+
+  margin:0 0 20px;
+
+  color:#ff3b3b;
+
+  letter-spacing:2px;
+
+}
+
+ 
+
+#endMessage p{
+
+  font-size:56px;
+
+  color:#ffc2c2;
+
+}
+
+ 
+
+/* ================= INPUT ================= */
+
+#manual{
+
+  position:absolute;
+
+  top:40px;
+
+  width:100%;
+
+  text-align:center;
+
+  font-size:50px;
+
+  opacity:.85;
+
+  display:none;
+
+}
+
+</style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
 <!-- ✅ LOGO -->
 
 <img id="logo" src="assets/logo.png" alt="Logo">
