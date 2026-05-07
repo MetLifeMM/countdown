@@ -2,6 +2,8 @@
 
 <html lang="es">
 
+ 
+
 <head>
 
 <meta charset="utf-8">
@@ -34,19 +36,21 @@ html,body{
 
  
 
-/* ================= LOGO ================= */
+/* ================= LOGO (AJUSTADO PRO) ================= */
 
 #logo{
 
   position:fixed;
 
-  top:30px;
+  top:40px;
 
-  left:40px;
+  left:60px;
 
-  width:360px;        /* Ajusta tamaño si deseas */
+  width:420px;
 
-  opacity:0.9;
+  opacity:0.75; /* 🔥 menos brillo */
+
+  filter: brightness(0.85) contrast(0.9); /* 🔥 más integrado */
 
   z-index:10;
 
@@ -54,107 +58,67 @@ html,body{
 
  
 
-/* ================= TIMER ================= */
+/* ================= BRAND BLOCK ================= */
 
-#screen{
+#brandBlock{
 
-  display:flex;
+  position:fixed;
 
-  justify-content:center;
+  bottom:40px;
 
-  align-items:center;
-
-  height:100%;
-
-  flex-direction:column;
-
-}
-
-#timer{
-
-  font-size:520px;
-
-  font-weight:900;
-
-}
-
-.warning{color:orange;}
-
-.danger{color:red;}
-
-.blink{animation:blink 1s infinite;}
-
-@keyframes blink{50%{opacity:0;}}
-
- 
-
-/* ================= MENSAJE FINAL ================= */
-
-#endMessage{
-
-  display:none;
-
-  margin-top:40px;
+  right:60px;
 
   text-align:center;
 
-}
+  color:white;
 
-#endMessage h1{
+  opacity:0.4; /* 🔥 balanceado con el logo */
 
-  font-size:120px;
-
-  margin:0 0 20px;
-
-  color:#ff3b3b;
-
-  letter-spacing:2px;
-
-}
-
-#endMessage p{
-
-  font-size:56px;
-
-  color:#ffc2c2;
+  z-index:10;
 
 }
 
  
 
-/* ================= INPUT ================= */
+/* Multimedia (arriba) */
 
-#manual{
+#brandTop{
 
-  position:absolute;
+  font-size:30px;
 
-  top:40px;
+  letter-spacing:1px;
 
-  width:100%;
-
-  text-align:center;
-
-  font-size:50px;
-
-  opacity:.85;
-
-  display:none;
+  margin-bottom:6px;
 
 }
 
-</style>
-
-</head>
-
  
 
-<body>
+/* Infrastructure (abajo) */
 
- 
+#brandBottom{
 
-<!-- LOGO / BRANDING -->
+  font-size:34px;
+
+  font-weight:600;
+
+  letter-spacing:1px;
+
+<!-- ✅ LOGO -->
 
 <img id="logo" src="assets/logo.png" alt="Logo">
+
+ 
+
+<!-- ✅ BRAND BLOQUE CENTRADO -->
+
+<div id="brandBlock">
+
+  <div id="brandTop">Multimedia</div>
+
+  <div id="brandBottom">IT Infrastructure Mex</div>
+
+</div>
 
  
 
@@ -188,8 +152,6 @@ html,body{
 
 <script>
 
-/* ================= ESTADO ================= */
-
 var total=0, remaining=0;
 
 var running=false, interval=null;
@@ -198,7 +160,7 @@ var endTimestamp=0;
 
  
 
-var mode="IDLE"; // IDLE | INPUT | RUNNING | END
+var mode="IDLE";
 
 var manualBuffer="";
 
@@ -207,8 +169,6 @@ var inputTimeout=null;
 var INPUT_DELAY=2000;
 
  
-
-/* ================= HELPERS ================= */
 
 function pad(n){return (n<10?"0":"")+n;}
 
@@ -234,15 +194,13 @@ function updateDisplay(){
 
   if(remaining<=10){
 
-    t.className="danger blink"; // incluye 0
+    t.className="danger blink";
 
   }
 
 }
 
  
-
-/* ================= TIMER ================= */
 
 function tick(){
 
@@ -302,8 +260,6 @@ function stopTimer(){
 
  
 
-/* ================= END INLINE ================= */
-
 function showEndInline(){
 
   if(mode==="END") return;
@@ -315,8 +271,6 @@ function showEndInline(){
 }
 
  
-
-/* ================= INPUT ================= */
 
 function startInput(digit){
 
@@ -364,8 +318,6 @@ function confirmInputAuto(){
 
  
 
-/* ================= RESET ================= */
-
 function resetAll(){
 
   if(inputTimeout) clearTimeout(inputTimeout);
@@ -391,8 +343,6 @@ function resetAll(){
 }
 
  
-
-/* ================= INPUT HANDLER ================= */
 
 document.addEventListener("keydown",function(e){
 
@@ -439,8 +389,6 @@ document.addEventListener("keydown",function(e){
 });
 
  
-
-/* ================= INIT ================= */
 
 resetAll();
 
