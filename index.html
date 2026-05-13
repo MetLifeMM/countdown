@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+ 
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Confidence Timer PRO</title>
+
+ 
+
+<style>
+
+html,body{
+
+  margin:0;
+
+  width:100%;
+
+  height:100%;
+
+  background:black;
+
+  color:white;
+
+  font-family:Arial;
+
+  overflow:hidden;
+
+}
+
+ 
+
+/* LOGO */
+
+#logo{
+
+  position:fixed;
+
+  top:15px;
+
+  left:40px;
+
+  width:340px;
+
+  opacity:0.75;
+
+}
+
+ 
+
+/* BRAND */
+
+#brandBlock{
+
+  position:fixed;
+
+  bottom:15px;
+
+  right:60px;
+
+  text-align:center;
+
+  opacity:0.4;
+
+}
+
+ 
+
+#brandTop{font-size:30px;}
+
+#brandBottom{font-size:34px;font-weight:600;}
+
+ 
+
+/* TIMER */
+
+#screen{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  height:100%;
+
+  flex-direction:column;
+
+}
+
+ 
+
+#timer{
+
+  font-size:520px;
+
+  font-weight:900;
+
+}
+
+ 
+
+.warning{color:orange;}
+
+.danger{color:red;}
+
+.blink{animation:blink 1s infinite;}
+
+ 
+
+@keyframes blink{50%{opacity:0;}}
+
+ 
+
+/* MENSAJE FINAL */
+
+#endMessage{
+
+  display:none;
+
+  margin-top:40px;
+
+  text-align:center;
+
+}
+
+ 
+
+#endMessage h1{font-size:120px;color:#ff3b3b;}
+
+#endMessage p{font-size:56px;}
+
+ 
+
+/* INPUT */
+
+#manual{
+
+  position:absolute;
+
+  top:40px;
+
+  width:100%;
+
+  text-align:center;
+
+  font-size:50px;
+
+  display:none;
+
+}
+
+</style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
+<!-- ✅ LOGO -->
+
+<img id="logo" src="assets/logo.png" alt="Logo">
+
+ 
+
+<!-- ✅ BRAND -->
+
+<div id="brandBlock">
+
+  <div id="brandTop">Multimedia</div>
+
+  <div id="brandBottom">IT Infrastructure Mex</div>
+
+</div>
+
+ 
+
+<div id="screen">
+
+  <div id="timer">00:00</div>
+
+ 
+
+  <div id="endMessage">
+
+    <h1>TIME’S UP ⏰</h1>
+
+    <p>Por favor, concluye tu participación</p>
+
+  </div>
+
+</div>
+
+ 
+
+<div id="manual">
+
+  Ajustando tiempo: <span id="manualValue">0</span> minutos
+
+</div>
+
+ 
+
+<script>
+
+var total=0, remaining=0;
+
+var running=false, interval=null;
+
+var endTimestamp=0;
+
+ 
+
+var mode="IDLE";
+
+var manualBuffer="";
+
+var inputTimeout=null;
+
+var INPUT_DELAY=2000;
+
+ 
+
+/* FORMAT */
+
+function pad(n){
+
+  return (n<10?"0":"")+n;
+
+}
+
+ 
+
+/* DISPLAY */
+
+function updateDisplay(){
+
+  var t=document.getElementById("timer");
+
+ 
+
+  t.textContent =
+
+    pad(Math.floor(remaining/60))+":"+pad(remaining%60);
+
+ 
+
+  // limpiar SIEMPRE
+
+  t.className="";
+
+ 
+
+  // ✅ SOLO colores si NO está en idle
+
+  if(mode !== "IDLE"){
+
+    if(remaining<=60 && remaining>10){
+
+      t.className="warning";
+
+    }
+
+    if(remaining<=10){
+
+      t.className="danger blink";
+
+    }
+
+  }
+
+}
+
+ 
+
+/* TICK */
+
+function tick(){
+
+  if(!running) return;
+
+ 
+
+  remaining=Math.max(
+
+    0,
+
+    Math.ceil((endTimestamp-Date.now())/1000)
+
+  );
+
+ 
+
+  updateDisplay();
+
+ 
+
+  if(remaining<=0){
+
+    stopTimer();
+
+    showEndInline();
+
+  }
+
+}
+
+ 
+
+/* START */
+
+function startTimer(){
+
+  if(remaining<=0) return;
+
+  running=true;
+
+  mode="RUNNING";
+
+  endTimestamp=Date.now()+remaining*1000;
+
+  interval=setInterval(tick,250);
+
+}
+
+ 
+
+/* STOP */
+
+function stopTimer(){
+
+  running=false;
+
+  if(interval){clearInterval(interval);}
+
+}
+
+ 
+
+/* END */
+
+function showEndInline(){
+
+  mode="END";
+
+  document.getElementById("endMessage").style.display="block";
+
+}
+
+ 
+
+/* INPUT */
+
+function startInput(digit){
+
+  if(mode!=="INPUT"){
+
+    mode="INPUT";
+
+    manualBuffer="";
+
+    document.getElementById("manual").style.display="block";
+
+    document.getElementById("endMessage").style.display="none";
+
+  }
+
+ 
+
+  manualBuffer+=digit;
+
+  document.getElementById("manualValue").textContent=manualBuffer;
+
+ 
+
+  if(inputTimeout) clearTimeout(inputTimeout);
+
+  inputTimeout=setTimeout(confirmInputAuto,INPUT_DELAY);
+
+}
+
+ 
+
+/* CONFIRM */
+
+function confirmInputAuto(){
+
+  if(manualBuffer==="") return;
+
+  total=parseInt(manualBuffer)*60;
+
+  remaining=total;
+
+  document.getElementById("manual").style.display="none";
+
+  startTimer();
+
+}
+
+ 
+
+/* RESET */
+
+function resetAll(){
+
+  if(inputTimeout) clearTimeout(inputTimeout);
+
+  stopTimer();
+
+ 
+
+  total=0;
+
+  remaining=0;
+
+  manualBuffer="";
+
+  mode="IDLE";
+
+ 
+
+  document.getElementById("manual").style.display="none";
+
+  document.getElementById("endMessage").style.display="none";
+
+ 
+
+  updateDisplay(); // 🔥 CORRECCIÓN CLAVE
+
+}
+
+ 
+
+/* 🔥 TECLADO MODO TV */
+
+document.addEventListener("keydown", function(e){
+
+ 
+
+  let code = e.keyCode;
+
+  let digit = null;
+
+ 
+
+  // NUMPAD (CON NUMLOCK)
+
+  if(code >= 96 && code <= 105){
+
+    digit = (code - 96).toString();
+
+  }
+
+ 
+
+  // FILA SUPERIOR
+
+  else if(code >= 48 && code <= 57){
+
+    digit = (code - 48).toString();
+
+  }
+
+ 
+
+  if(digit === null) return;
+
+ 
+
+  if(digit==="9"){
+
+    resetAll();
+
+    return;
+
+  }
+
+ 
+
+  if(mode==="RUNNING"){
+
+    if(digit==="0") resetAll();
+
+    return;
+
+  }
+
+ 
+
+  if(mode==="END"){
+
+    resetAll();
+
+    return;
+
+  }
+
+ 
+
+  startInput(digit);
+
+ 
+
+});
+
+ 
+
+resetAll();
+
+</script>
+
+ 
+
+</body>
+
+</html>
