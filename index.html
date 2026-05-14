@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+ 
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Timer v2 DEBUG</title>
+
+ 
+
+<style>
+
+html,body{
+
+  margin:0;
+
+  background:black;
+
+  color:white;
+
+  font-family:Arial;
+
+}
+
+ 
+
+#debug{
+
+  position:fixed;
+
+  top:0;
+
+  width:100%;
+
+  background:black;
+
+  color:lime;
+
+  font-size:24px;
+
+  padding:10px;
+
+  z-index:999;
+
+}
+
+ 
+
+#version{
+
+  position:fixed;
+
+  bottom:10px;
+
+  left:10px;
+
+  color:gray;
+
+}
+
+ 
+
+#screen{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  height:100vh;
+
+}
+
+ 
+
+#timer{
+
+  font-size:200px;
+
+}
+
+</style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
+<div id="debug">Esperando input...</div>
+
+<div id="screen">
+
+  <div id="timer">00:00</div>
+
+</div>
+
+ 
+
+<div id="version">v2 DEBUG (multi-event)</div>
+
+ 
+
+<script>
+
+function log(msg){
+
+  document.getElementById("debug").innerHTML = msg;
+
+}
+
+ 
+
+/* 🔥 función única para todos los eventos */
+
+function handle(e, type){
+
+ 
+
+  log(
+
+    "EVENT: " + type +
+
+    "<br>keyCode: " + e.keyCode
+
+  );
+
+ 
+
+}
+
+ 
+
+/* 🔥 probamos TODOS */
+
+window.onkeydown = (e)=>handle(e,"keydown");
+
+window.onkeyup   = (e)=>handle(e,"keyup");
+
+window.onkeypress= (e)=>handle(e,"keypress");
+
+ 
+
+document.onkeydown = (e)=>handle(e,"doc keydown");
+
+document.onkeyup   = (e)=>handle(e,"doc keyup");
+
+document.onkeypress= (e)=>handle(e,"doc keypress");
+
+ 
+
+</script>
+
+ 
+
+</body>
+
+</html>
