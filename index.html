@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+ 
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Confidence Timer PRO v4</title>
+
+ 
+
+<style>
+
+html,body{
+
+  margin:0;
+
+  width:100%;
+
+  height:100%;
+
+  background:black;
+
+  color:white;
+
+  font-family:Arial;
+
+  overflow:hidden;
+
+}
+
+ 
+
+/* DEBUG */
+
+#debug{
+
+  position:fixed;
+
+  top:0;
+
+  width:100%;
+
+  color:lime;
+
+  font-size:20px;
+
+  text-align:center;
+
+  opacity:0.6;
+
+}
+
+ 
+
+/* VERSION */
+
+#version{
+
+  position:fixed;
+
+  bottom:10px;
+
+  left:10px;
+
+  color:gray;
+
+  opacity:0.4;
+
+}
+
+ 
+
+/* TIMER */
+
+#screen{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  height:100%;
+
+  flex-direction:column;
+
+}
+
+ 
+
+#timer{
+
+  font-size:400px;
+
+  font-weight:900;
+
+}
+
+ 
+
+.warning{color:orange;}
+
+.danger{color:red;}
+
+.blink{animation:blink 1s infinite;}
+
+ 
+
+@keyframes blink{50%{opacity:0;}}
+
+ 
+
+#manual{
+
+  position:absolute;
+
+  top:100px;
+
+  width:100%;
+
+  text-align:center;
+
+  font-size:50px;
+
+  display:none;
+
+}
+
+</style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
+<div id="debug">Esperando input...</div>
+
+ 
+
+<div id="screen">
+
+  <div id="timer">00:00</div>
+
+</div>
+
+ 
+
+<div id="manual">
+
+  Tiempo: <span id="manualValue"></span> min
+
+</div>
+
+ 
+
+<div id="version">v4 FINAL (keypress OK)</div>
+
+ 
+
+<script>
+
+let mode="IDLE";
+
+let buffer="";
+
+let remaining=0;
+
+let interval=null;
+
+let inputTimeout=null;
+
+ 
+
+function pad(n){
+
+  return (n<10?"0":"")+n;
+
+}
+
+ 
+
+function updateDisplay(){
+
+  let t=document.getElementById("timer");
+
+ 
+
+  t.innerText =
+
+    pad(Math.floor(remaining/60))+":"+pad(remaining%60);
+
+ 
+
+  t.className="";
+
+ 
+
+  if(mode!=="IDLE"){
+
+    if(remaining<=60 && remaining>10){
+
+      t.className="warning";
+
+    }
+
+    if(remaining<=10){
+
+      t.className="danger blink";
+
+    }
+
+  }
+
+}
+
+ 
+
+function log(msg){
+
+  document.getElementById("debug").innerText = msg;
+
+}
+
+ 
+
+function startTimer(){
+
+  if(remaining<=0) return;
+
+ 
+
+  mode="RUNNING";
+
+ 
+
+  clearInterval(interval);
+
+ 
+
+  interval=setInterval(()=>{
+
+    remaining--;
+
+    updateDisplay();
+
+ 
+
+    if(remaining<=0){
+
+      clearInterval(interval);
+
+      mode="END";
+
+    }
+
+  },1000);
+
+}
+
+ 
+
+function resetAll(){
+
+  clearInterval(interval);
+
+ 
+
+  buffer="";
+
+  remaining=0;
+
+  mode="IDLE";
+
+ 
+
+  document.getElementById("manual").style.display="none";
+
+ 
+
+  updateDisplay();
+
+}
+
+ 
+
+/* 🔥 EVENTO DEFINITIVO */
+
+window.onkeypress=function(e){
+
+ 
+
+  let code = e.keyCode;
+
+ 
+
+  log("keypress → " + code);
+
+ 
+
+  // ✅ SOLO NUMEROS
+
+  if(code < 48 || code > 57) return;
+
+ 
+
+  let digit = String.fromCharCode(code);
+
+ 
+
+  /* RESET */
+
+  if(digit==="9"){
+
+    resetAll();
+
+    return;
+
+  }
+
+ 
+
+  if(mode==="RUNNING"){
+
+    if(digit==="0") resetAll();
+
+    return;
+
+  }
+
+ 
+
+  if(mode==="END"){
+
+    resetAll();
+
+    return;
+
+  }
+
+ 
+
+  /* INPUT */
+
+  mode="INPUT";
+
+ 
+
+  buffer += digit;
+
+ 
+
+  document.getElementById("manual").style.display="block";
+
+  document.getElementById("manualValue").innerText = buffer;
+
+ 
+
+  clearTimeout(inputTimeout);
+
+ 
+
+  inputTimeout=setTimeout(()=>{
+
+    remaining = parseInt(buffer)*60;
+
+    document.getElementById("manual").style.display="none";
+
+    startTimer();
+
+  },1500);
+
+}
+
+ 
+
+updateDisplay();
+
+</script>
+
+ 
+
+</body>
+
+</html>
