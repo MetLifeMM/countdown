@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+ 
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Timer v5 FINAL</title>
+
+ 
+
+<style>
+
+html,body{
+
+  margin:0;
+
+  height:100%;
+
+  background:black;
+
+  color:white;
+
+  font-family:Arial;
+
+  overflow:hidden;
+
+}
+
+ 
+
+/* INPUT OCULTO (CLAVE) */
+
+#hiddenInput{
+
+  position:absolute;
+
+  opacity:0;
+
+  font-size:40px;
+
+}
+
+ 
+
+/* TIMER */
+
+#screen{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  height:100%;
+
+  flex-direction:column;
+
+}
+
+ 
+
+#timer{
+
+  font-size:300px;
+
+}
+
+ 
+
+.warning{color:orange;}
+
+.danger{color:red;}
+
+.blink{animation:blink 1s infinite;}
+
+@keyframes blink{50%{opacity:0;}}
+
+ 
+
+#manual{
+
+  position:absolute;
+
+  top:80px;
+
+  width:100%;
+
+  text-align:center;
+
+  font-size:50px;
+
+}
+
+</style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
+<!-- 🔥 INPUT REAL -->
+
+<input id="hiddenInput" autofocus />
+
+ 
+
+<div id="screen">
+
+  <div id="timer">00:00</div>
+
+</div>
+
+ 
+
+<div id="manual">
+
+  Entrada: <span id="value"></span>
+
+</div>
+
+ 
+
+<script>
+
+let input = document.getElementById("hiddenInput");
+
+ 
+
+let buffer="";
+
+let remaining=0;
+
+let interval=null;
+
+ 
+
+function pad(n){ return (n<10?"0":"")+n; }
+
+ 
+
+function render(){
+
+  document.getElementById("timer").innerText =
+
+    pad(Math.floor(remaining/60))+":"+
+
+    pad(remaining%60);
+
+}
+
+ 
+
+function startTimer(){
+
+  clearInterval(interval);
+
+ 
+
+  interval=setInterval(()=>{
+
+    remaining--;
+
+    render();
+
+ 
+
+    if(remaining<=0){
+
+      clearInterval(interval);
+
+    }
+
+  },1000);
+
+}
+
+ 
+
+/* 🔥 DETECCIÓN REAL */
+
+input.addEventListener("input", function(){
+
+ 
+
+  buffer = input.value;
+
+ 
+
+  document.getElementById("value").innerText = buffer;
+
+ 
+
+});
+
+ 
+
+/* 🔥 CONFIRMACIÓN AUTOMÁTICA */
+
+setInterval(()=>{
+
+  if(buffer.length > 0){
+
+    remaining = parseInt(buffer)*60;
+
+    input.value="";
+
+    buffer="";
+
+    startTimer();
+
+  }
+
+},2000);
+
+ 
+
+/* 🔥 FOCO PERMANENTE */
+
+setInterval(()=>{
+
+  input.focus();
+
+},500);
+
+ 
+
+render();
+
+</script>
+
+ 
+
+</body>
+
+</html>
